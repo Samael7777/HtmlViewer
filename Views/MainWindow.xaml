@@ -1,0 +1,160 @@
+﻿<Window x:Class="HtmlViewer.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:cc="clr-namespace:HtmlViewer.CustomControls"
+        xmlns:vm="clr-namespace:HtmlViewer.ViewModels"
+        d:DataContext="{d:DesignInstance IsDesignTimeCreatable=False, Type={x:Type vm:MainVm}}"
+        mc:Ignorable="d"
+        Cursor="{Binding MainCursor}"
+        Title="Html Viewer" MinHeight="600" MinWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <Menu Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3"
+              VerticalAlignment="Top"
+              Background="{Binding Background, RelativeSource={RelativeSource AncestorType={x:Type Window}, Mode=FindAncestor}}" BorderBrush="#FF828790" Margin="10,0,10,0">
+            <MenuItem Header="Файл" BorderBrush="#FF828790" HorizontalContentAlignment="Center" Padding="6,0,6,0">
+                <MenuItem Header="Загрузить контент из файла" Command="{Binding LoadFromFileCmd}" />
+                <MenuItem Header="Сохранить контент в файл" Command="{Binding SaveToFileCmd}" />
+                <Separator />
+                <MenuItem Header="Выход" Command="{Binding ExitCmd}" />
+            </MenuItem>
+        </Menu>
+        <cc:InputBoxExec Grid.Row="1" Margin="5,5,5,5"
+                         Text="{Binding SiteUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         TextWrapping="Wrap" VerticalAlignment="Center" Grid.Column="1"
+                         OnEnterCommand="{Binding GetPageCmd}" />
+        <Button Grid.Row="1" Grid.Column="2" Command="{Binding GetPageCmd}"
+                Content="Запросить страницу" HorizontalAlignment="Left"
+                Margin="5,5,10,5" VerticalAlignment="Center"
+                Padding="2,1,2,1" Width="120" />
+        <StackPanel Grid.Column="0" Grid.Row="2" Margin="5,5,10,5" Grid.ColumnSpan="3" Orientation="Horizontal">
+            <TextBlock Text="Тип прокси:" Margin="10,0,5,0" HorizontalAlignment="Left" VerticalAlignment="Center" />
+            <ComboBox ItemsSource="{Binding ProxyTypes}"
+                      SelectedIndex="{Binding ProxySelectedIndex}" Width="200" Margin="5,0,5,0">
+                <b:Interaction.Triggers>
+                    <b:EventTrigger EventName="SelectionChanged">
+                        <b:InvokeCommandAction Command="{Binding SetProxyCmd}"
+                                               CommandParameter="{Binding SelectedIndex, 
+                                                RelativeSource={RelativeSource AncestorType=
+                                                {x:Type ComboBox}, Mode=FindAncestor}}" />
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
+            </ComboBox>
+            <TextBlock Text="Адрес прокси:" IsEnabled="{Binding IsProxyEnabled}" Margin="5,0,5,0"
+                       HorizontalAlignment="Left" VerticalAlignment="Center" />
+            <TextBox Width="200" IsEnabled="{Binding IsProxyEnabled}"
+                     Text="{Binding ProxyHost, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="5,0,5,0"
+                     VerticalContentAlignment="Center" />
+            <TextBlock Text="Порт прокси:" IsEnabled="{Binding IsProxyEnabled}" Margin="5,0,5,0"
+                       HorizontalAlignment="Left" VerticalAlignment="Center" />
+            <TextBox Width="70" IsEnabled="{Binding IsProxyEnabled}"
+                     Text="{Binding ProxyPort, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     PreviewTextInput="ProxyPort_OnPreviewTextInput" PreviewKeyDown="ProxyPort_OnPreviewKeyDown"
+                     VerticalContentAlignment="Center" />
+        </StackPanel>
+        <!--<CheckBox Content="Использовать Chromium"
+                  IsChecked="{Binding UseChromeBrowser, Mode=TwoWay}"
+                  HorizontalAlignment="Left"
+                  VerticalAlignment="Center" Margin="10,5,5,5" Grid.Row="3" Grid.Column="0" />-->
+
+        <Label Grid.Column="0" Content="Селектор выбранного узла" HorizontalAlignment="Left"
+               Margin="10,5,5,5" Grid.Row="6" VerticalAlignment="Center" />
+        <cc:InputBoxExec Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding Selector}"
+                         IsReadOnly="True" IsReadOnlyCaretVisible="True"
+                         OnEnterCommand="{Binding GetNodesCmd}"
+                         Margin="5,5,10,5" VerticalAlignment="Center" />
+        <Button Grid.Column="2" Command="{Binding GetNodesCmd}"
+                Content="Выбрать элементы" HorizontalAlignment="Left"
+                Margin="5,5,10,5" Grid.Row="5" VerticalAlignment="Center" Width="120" />
+        <Label Grid.Row="1" Grid.Column="0" Content="Строка адреса" VerticalAlignment="Center"
+               Margin="10,5,5,5" HorizontalAlignment="Left" />
+        <Label Content="Строка-селектор" HorizontalAlignment="Left" Grid.Row="5" Grid.Column="0"
+               VerticalAlignment="Center" Margin="10,5,5,5" />
+        <cc:InputBoxExec Grid.Column="1" Margin="5,5,5,5" Grid.Row="5" TextWrapping="Wrap"
+                         Text="{Binding NodesPredicate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         OnEnterCommand="{Binding GetNodesCmd}"
+                         VerticalAlignment="Center" />
+        <StackPanel Grid.Row="4" Grid.Column="0" Orientation="Horizontal" Margin="10,5,10,5" VerticalAlignment="Center"
+                    Grid.ColumnSpan="3">
+            <Label Content="Статус:" HorizontalAlignment="Left" Margin="0,0,5,0"
+                   VerticalAlignment="Center" />
+            <Label Content="{Binding Status}" Foreground="{Binding StatusColor}" />
+        </StackPanel>
+        <StackPanel Grid.Row="7" Grid.ColumnSpan="2" Grid.Column="0" Orientation="Horizontal"
+                    HorizontalAlignment="Left" VerticalAlignment="Center">
+            <RadioButton GroupName="Content" Content="HTML" IsChecked="{Binding IsHtml}"
+                         HorizontalAlignment="Left" VerticalAlignment="Center"
+                         Margin="10,5,0,5" />
+            <RadioButton GroupName="Content" Content="Текст" IsChecked="{Binding IsText}"
+                         HorizontalAlignment="Left" VerticalAlignment="Center"
+                         Margin="10,5,5,5" Padding="4,-1,0,0" />
+        </StackPanel>
+        <Grid Grid.Column="0" Grid.Row="8" Grid.ColumnSpan="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*" MinWidth="100" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="3*" MinWidth="100" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="2*" MinHeight="150" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="1*" MinHeight="50" />
+            </Grid.RowDefinitions>
+            <TreeView Grid.Column="0" ItemsSource="{Binding RootNode}"
+                      Margin="10,5,5,10" MinWidth="100"
+                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                      Grid.RowSpan="3">
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                        <TextBlock Text="{Binding NodeName}" />
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
+                <b:Interaction.Triggers>
+                    <b:EventTrigger EventName="SelectedItemChanged">
+                        <b:InvokeCommandAction Command="{Binding ShowNodeInfoCmd}"
+                                               CommandParameter="{Binding SelectedItem, 
+                                                RelativeSource={RelativeSource AncestorType=
+                                                {x:Type TreeView}, Mode=FindAncestor}}" />
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
+            </TreeView>
+            <GridSplitter Grid.Column="1" Width="4" ResizeBehavior="PreviousAndNext"
+                          Margin="0,5,0,5" ShowsPreview="False"
+                          HorizontalAlignment="Center" VerticalAlignment="Stretch" Grid.Row="0" Grid.RowSpan="3" />
+            <TextBox Grid.Row="0" Grid.Column="2" Text="{Binding NodeContent, Mode=OneWay}"
+                     TextWrapping="Wrap" Margin="5,5,10,5"
+                     VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                     IsReadOnly="True" IsReadOnlyCaretVisible="True" />
+            <GridSplitter Grid.Column="2" Grid.Row="1" Height="4" ResizeBehavior="PreviousAndNext"
+                          ShowsPreview="False"
+                          VerticalAlignment="Center" HorizontalAlignment="Stretch" />
+            <DataGrid Grid.Column="2" Grid.Row="2" ItemsSource="{Binding Attributes}"
+                      Margin="5,5,10,10"
+                      AutoGenerateColumns="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="1*" />
+                    <DataGridTextColumn Header="Значение" Binding="{Binding Value}" Width="1*" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </Grid>
+</Window>
